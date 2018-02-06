@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#26631;&#20934;&#29992;&#20363; </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#26631;&#20934;&#29992;&#20363; ">
+    <meta name="generator" content="docfx 2.30.0.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="标准用例">标准用例</h1>
+
+<p><br><code>SM3_Basic</code>库包含的高级功能块不通过标准设置/实际值接口与驱动器交互。这些功能块通过读取或写入AXIS_REF_SM3实例的参数来提供命令或更改驱动器的设置。</p>
+<p>另见</p>
+<ul>
+<li><p>AXIS_REF_SM3</p>
+</li>
+<li><p>重新初始化一个驱动器</p>
+</li>
+<li>启动/关闭驱动器</li>
+<li>控制机械制动器</li>
+<li>切换控制模式</li>
+<li>回参（驱动控制）</li>
+<li>位置检测</li>
+</ul>
+<h2 id="重新初始化一个驱动器">重新初始化一个驱动器</h2>
+<p>如果您在运行时更改了驱动器参数，则必须重新初始化驱动器。示例：更改旋转驱动器的比例因子或位置循环。通过在<code>Execute</code>输入端以上升沿调用<code>SMC3_ReinitDrive功能块</code>，驱动器的<code>wCommuncationState</code>参数将被重置，并重复驱动器的完整启动过程。</p>
+<p> <strong>提示</strong><br>
+ 等待重新初始化，直到轴达到所需状态<code>SMC_COMSTATE_BASE_COM_INITIALIZATION</code>或更高。否则，将打印<code>SMC_RAG_ERROR_AXIS_NOT_INITIALIZED</code>错误。</p>
+<p>如果从属现场总线的通讯中断，则也需要重新初始化。如果发生<code>SMC_DI_GENERAL_COMMUNICATION_ERROR</code>错误，则需要执行以下错误处理。</p>
+<blockquote><p>错误处理</p>
+<p>1.重新启动现场总线<br></p>
+<blockquote><p><strong>注意</strong></p>
+<p>您可以配置一些现场总线，以便它们自动重启。 通常需要通过IEC代码添加现场总线的特殊错误处理。</p>
+</blockquote>
+<p>⇒现场总线通讯开始</p>
+<p>2.使用<code>SMC3_ReinitDrive</code>重新启动驱动器/轴。<br> ⇒驱动器/轴启动。</p>
+</blockquote>
+<p>另见</p>
+<ul>
+<li>SMC3_ReinitDrive</li>
+<li>SMC_ERROR</li>
+</ul>
+<h2 id="启动关闭驱动器">启动/关闭驱动器</h2>
+<p><br><code>AXIS_REF_SM3</code>功能块的<code>bRegulatorOn</code>和<code>bDriveStart</code>参数控制驱动器的性能水平和减速度。通过<code>MC_Power</code>功能块进行访问。</p>
+<p>要释放输出状态，必须设置<code>MC_Power</code>功能块的<code>bRegulatorOn</code>参数。驱动器通过<code>bRegulatorRealState</code>输出报告此过程的当前状态。如果驱动器支持，则<code>bRegulatorOn</code>复位会在运动过程中立即停用转矩。在这种情况下，功能块报告错误并将轴设置为<code>errorstop</code>状态。</p>
+<p><br><code>bDriveStart</code>变量确定驱动器是否可以移动。这个参数的当前状态可以在<code>bDriveStartRealState</code>中找到。</p>
+<p>如果驱动器支持，则在运动过程中，<code>bDriveStart</code>参数重置会使用配置的斜坡（QuickStop）使驱动器减速。 然后驱动器在<code>bRegulatorOn</code>中设置的到达位置停止。 在QuickStop机制激活之前，轴保持停止状态（bDriveStart输入= FALSE）。如果驱动器之前被功能块移动，则显示<code>CommandAborted</code>。这不适用于<code>MC_Stop</code>功能块，将报告错误并将轴设置为<code>errorstop</code>状态。</p>
+<p>另见</p>
+<ul>
+<li>MC_POWER</li>
+</ul>
+<h2 id="控制机械制动器">控制机械制动器</h2>
+<p>如果驱动器支持，则可通过<code>SMC3_BrakeControl</code>功能块设置或重置变量<code>eBrakeControl</code>。有三种不同的模式。</p>
+<p><br><code>SMC3_BrakeSetState</code></p>
+<ul>
+<li><code>SMC_BRAKE_AUTO</code>：制动器的状态由驱动器控制。</li>
+<li><code>SMC_BRAKE_OPEN</code>：制动器打开。</li>
+<li><code>SMC_BRAKE_CLOSE</code>：制动器关闭。</li>
+</ul>
+<p>变量<code>bBrakeClosedRealState</code>报告刹车的当前状态。</p>
+<p>从SoftMotion的角度来看，控制以及机械制动的状态并不取决于驱动器的状态或运行状态。</p>
+<p>另见</p>
+<ul>
+<li>SMC3_BrakeControl</li>
+</ul>
+<h2 id="切换控制模式">切换控制模式</h2>
+<p>使用<code>SMC_SetControllerMode</code>功能块，可以在不同的控制模式之间切换。来自<code>AXIS_REF_SM3</code>的<code>byControllerMode</code>和<code>byRealControllerMode</code>参数表示控制器的必要和当前状态。</p>
+<p>可能的值</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SMC_nocontrol</td>
+<td>不是有效的控制器模式</td>
+</tr>
+<tr>
+<td>SMC_torque</td>
+<td>扭矩/力控制</td>
+</tr>
+<tr>
+<td>SMC_velocity</td>
+<td>速度控制</td>
+</tr>
+<tr>
+<td>SMC_position</td>
+<td>位置控制</td>
+</tr>
+</tbody>
+</table>
+<p>在写入<code>byControllerMode</code>变量之后，将检查当前状态，直到它与必要的控制模式一致。</p>
+<p>同时，例如在更改控制模式时，POU会计算轴的指定值。然后它将输出<code>bDone</code>设置为TRUE。到目前为止，它没有为轴准备更多的指定值。这必须由其他功能块完成。 示例：输出<code>bDone</code>触发功能块<code>MC_MoveVelocity</code>，<code>MC_MoveAbsolute</code>或<code>MC_Halt</code>。否则，在更改控制模式后，轴会立即停止。</p>
+<p>另见</p>
+<ul>
+<li>SMC_SetControllerMode</li>
+</ul>
+<h2 id="回参驱动控制">回参（驱动控制）</h2>
+<p>在SoftMotion中，可以通过两种方式参考回参驱动器：</p>
+<ul>
+<li>由PLC中的控制器回参：通过调用<code>SMC_Homing</code>功能块来执行该回参。参考信号必须是控制器I/O映射的一部分。在参考时，变频器保持控制模式“位置控制”。通常，这种方法不是特别准确，因为检测位置（当参考开关被激活时）是基于由驱动获得的当前位置。因此，精度受到通信周期的限制。</li>
+<li>变频器中的控制器回参：参考开关连接到变频器。它的位置检测速度更快，精度更高。在驱动器控制的参考路径中，驱动器处于另一种控制模式，在该模式下，驱动器由内部过程控制，并且不遵循控制器的设置值。当参考路径结束时，变频器复位到原来的控制模式。<br>
+<br><code>MC_Home</code>功能块通过设置<code>fReference</code>和<code>bStartReference</code>来启动驱动器控制的参考路径。另外，<code>AXIS_REF_SM3（wState）</code>的状态被设置为<code>homing</code>。当驱动器传递到参考路径（意味着它不再遵循控制器指定的值）时，驱动器将该参数设置为<code>TRUE</code>。 为了显示参考路径的末尾，驱动器将<code>bStartReference</code>和<code>bStartReferenceRealState</code>的值设置为<code>FALSE</code>。</li>
+</ul>
+<p>另见</p>
+<ul>
+<li>SMC_Homing</li>
+<li>MC_Home</li>
+</ul>
+<h2 id="位置检测">位置检测</h2>
+<p>您可以通过多种方式检测轴的位置，具体取决于驱动器支持的驱动器功能：</p>
+<ul>
+<li>驱动器检测轴位置（集成或通过打开外部传感器）。由于实际位置是由驱动器本身传送的，所以信号的传送时间是最小的和精确的。</li>
+<li>轴的当前位置由驱动器决定，并通过输入传送到控制器。 控制器输入和应用程序周期的延迟使得这种方法不够精确。当驱动器本身的位置被传送时，它通常由相应的驱动器根据制造商直接在应用程序中处理。要确定这种轴的位置，可以使用<code>MC_TouchProbe</code>功能块。它允许将轴位置记录到可配置的触发器和位置窗口内。如果驱动器没有传送位置，则必须将其传送到驱动器，例如进行控制。请参阅“使用SM_Drive_PosControl对PLC进行位置控制”一节。</li>
+</ul>
+<p>另见</p>
+<ul>
+<li>MC_TouchProbe</li>
+<li>AXIS_REF_SM3</li>
+<li>使用SM_Drive_PosControl对PLC进行位置控制</li>
+</ul>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
